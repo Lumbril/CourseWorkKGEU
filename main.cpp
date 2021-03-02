@@ -1,116 +1,86 @@
 #include <iostream>
-#include <vector>
-#include "vector.h"
 using namespace std;
 
-// Enum РґР»СЏ РѕР±РѕР·РЅР°С‡РµРЅРёСЏ Р»РµРєСЃРµРј
-enum LexemeType{
-    LEFT_BRACKET, RIGHT_BRACKET,            // Р»РµРІР°СЏ, РїСЂР°РІР°СЏ СЃРєРѕР±РєР°
-    OP_MINUS, OP_PLUS, OP_MULT, OP_DIV,     // РѕРїРµСЂР°С‚РѕСЂС‹ -, +, *, /
-    NUMBER,                                 // С‡РёСЃР»Рѕ
-    END_STR                                 // РєРѕРЅРµС† СЃС‚СЂРѕРєРё
-};
+// константы для обозначения лексем
+const char LEFT_BRACKET = '(';
+const char RIGHT_BRACKET = ')';
+const char OP_PLUS = '+';
+const char OP_MINUS = '-';
+const char OP_MULT = '*';
+const char OP_DIV = '/';
+const char NUMBER = 'N';
+const char END_STR = 'E';
 
-// РљР»Р°СЃСЃ РґР»СЏ Р»РµРєСЃРµРјС‹
-class Lexeme {
-public:
-    LexemeType type;
+// Структура лексемы
+struct Lexeme {
+    char type;
     string val;
-
-    Lexeme(){}
-
-    Lexeme(LexemeType t, string s) {
-        type = t;
-        val = s;
-    }
-
-    Lexeme(LexemeType t, const char ch) {
-        type = t;
-        val = ch;
-    }
-
-    string toString() {
-        string str = "Lexeme{ ";
-        str += "type=" + type;
-        str += ", value='" + val + '\'';
-        str += "}";
-
-        return  str;
-    }
 };
 
-// Р’СЃРїРѕРјРѕРіР°С‚РµР»СЊРЅС‹Р№ РєР»Р°СЃСЃ РґР»СЏ Р»РµРєСЃРµРј
-class LexemeBuffer {
-private:
-    int pos;
-public:
-    Vector<Lexeme> lexemes;
+// Массив хранящий лексемы
+Lexeme lexems[100000];
+int posLexems = 0;
 
-    LexemeBuffer(){}
+// Вспомогательный массив LexemBuffer и методы для его работы
+Lexeme lexemBuffer[100000];
+int posLB = 0;
+int szLB;
 
-    LexemeBuffer(Vector<Lexeme> lex) {
-        for (int i = 0; i < lex.size(); ++i) {
-            lexemes.push_back(lex[i]);
-        }
+void initLB() {
+    szLB = posLexems;
+
+    for (int i = 0; i < posLexems; i++) {
+        lexemBuffer[i] = lexems[i];
     }
+}
 
-    Lexeme next() {
-        return lexemes[pos++];
-    }
+Lexeme nextLB() {
+    return lexemBuffer[posLB++];
+}
 
-    void back() {
-        pos--;
-    }
+void backLB() {
+    posLB--;
+}
 
-    int getPos() {
-        return pos;
-    }
+int getPosLB() {
+    return posLB;
+}
 
-    LexemeBuffer operator = (Vector<Lexeme> lex) {
-        for (int i = 0; i < lex.size(); ++i) {
-            lexemes.push_back(lex[i]);
-        }
-    }
-};
-
-LexemeBuffer lex;
-
-Vector<Lexeme> lexemeAnalyze(string expText) {
-    Vector<Lexeme> lexemes; // РјР°СЃСЃРёРІ Р»РµРєСЃРµРј
+// Метод для разбиения строки на лексемы
+void lexexAnalyze(string expText) {
     int pos = 0;
 
-    // СЂР°Р·Р±РёРµРЅРёРµ СЃС‚СЂРѕРєРё РЅР° Р»РµРєСЃРµРјС‹
     while (pos < expText.size()) {
         char ch = expText[pos];
 
         switch (ch) {
-            case '(':
-                lexemes.push_back(Lexeme(LEFT_BRACKET, ch));
+            case LEFT_BRACKET:
+                lexems[posLexems++] = {LEFT_BRACKET, "("};
                 pos++;
 
                 break;
-            case ')':
-                lexemes.push_back(Lexeme(RIGHT_BRACKET, ch));
+            case RIGHT_BRACKET:
+                lexems[posLexems++] = {RIGHT_BRACKET, ")"};
                 pos++;
 
                 break;
-            case '+':
-                lexemes.push_back(Lexeme(OP_PLUS, ch));
+            case OP_PLUS:
+                lexems[posLexems++] = {OP_PLUS, "+"};
                 pos++;
 
                 break;
-            case '-':
-                lexemes.push_back(Lexeme(OP_MINUS, ch));
+            case OP_MINUS:
+                lexems[posLexems++] = {OP_MINUS, "-"};
                 pos++;
 
                 break;
-            case '*':
-                lexemes.push_back(Lexeme(OP_MULT, ch));
+            case OP_MULT:
+                lexems[posLexems++] = {OP_MULT, "*"};
                 pos++;
 
                 break;
-            case '/':
-                lexemes.push_back(Lexeme(OP_DIV, ch));
+            case OP_DIV:
+                lexems[posLexems++] = {OP_DIV, "/"};
                 pos++;
 
                 break;
@@ -129,7 +99,7 @@ Vector<Lexeme> lexemeAnalyze(string expText) {
                         ch = expText[pos];
                     } while ('0' <= ch && ch <= '9');
 
-                    lexemes.push_back(Lexeme(NUMBER, buf));
+                    lexems[posLexems++] = {NUMBER, buf};
                 } else {
                     if (ch != ' ') {
                         throw ("Invalid character" + ch);
@@ -140,9 +110,7 @@ Vector<Lexeme> lexemeAnalyze(string expText) {
         }
     }
 
-    lexemes.push_back(Lexeme(END_STR, ""));
-
-    return lexemes;
+    lexems[posLexems++] = {END_STR, "END"};
 }
 
 string optimize(string s) {
@@ -177,38 +145,21 @@ string optimize(string s) {
     return s;
 }
 
+// Рекурсивные методы для вычисления выражения
+int expr();
+int multdiv();
 int plusminus();
+int factor();
 
 int expr() {
-    Lexeme lexeme = lex.next();
+    Lexeme lexeme = nextLB();
 
     if (lexeme.type == END_STR) {
         return 0;
     } else {
-        lex.back();
+        backLB();
 
         return plusminus();
-    }
-}
-
-int factor() {
-    Lexeme lexeme = lex.next();
-    int val;
-
-    switch (lexeme.type) {
-        case NUMBER:
-            return atoi(lexeme.val.c_str());
-        case LEFT_BRACKET:
-            val = expr();
-            lexeme = lex.next();
-
-            if (lexeme.type != RIGHT_BRACKET) {
-                throw ("Forgot bracket");
-            }
-
-            return val;
-        default:
-            throw ("Incorrect entry");
     }
 }
 
@@ -216,7 +167,7 @@ int multdiv() {
     int val = factor();
 
     while (1) {
-        Lexeme lexeme = lex.next();
+        Lexeme lexeme = nextLB();
 
         switch (lexeme.type) {
             case OP_MULT:
@@ -228,7 +179,7 @@ int multdiv() {
 
                 break;
             default:
-                lex.back();
+                backLB();
 
                 return val;
         }
@@ -239,7 +190,7 @@ int plusminus() {
     int val = multdiv();
 
     while (1) {
-        Lexeme lexeme = lex.next();
+        Lexeme lexeme = nextLB();
 
         switch (lexeme.type) {
             case OP_PLUS:
@@ -251,15 +202,36 @@ int plusminus() {
 
                 break;
             default:
-                lex.back();
+                backLB();
 
                 return val;
         }
     }
 }
 
+int factor() {
+    Lexeme lexeme = nextLB();
+    int val;
+
+    switch (lexeme.type) {
+        case NUMBER:
+            return atoi(lexeme.val.c_str());
+        case LEFT_BRACKET:
+            val = expr();
+            lexeme = nextLB();
+
+            if (lexeme.type != RIGHT_BRACKET) {
+                throw ("Forgot bracket");
+            }
+
+            return val;
+        default:
+            throw ("Incorrect entry");
+    }
+}
+
 int Form(string expression, int x, int y) {
-    // Р—Р°РјРµРЅСЏРµРј РІСЃРµ X Рё Y РЅР° РёС… Р·РЅР°С‡РµРЅРёСЏ
+    // Заменяем все X и Y на их значения
     while (expression.find('x') != string :: npos) {
         expression.replace(expression.find('x'), 1, to_string(x));
     }
@@ -268,13 +240,12 @@ int Form(string expression, int x, int y) {
         expression.replace(expression.find('y'), 1, to_string(y));
     }
 
-    //РѕР±СЂР°Р±Р°С‚С‹РІР°РµРј Р·Р°РїРёСЃСЊ РѕС‚СЂРёС†Р°С‚РµР»СЊРЅРѕРіРѕ С‡РёСЃР»Р° РІ СЃРєРѕР±РєР°С…/РєР°Рє РЅР°С‡Р°Р»Рѕ СЃС‚СЂРѕРєРё/РєР°Рє -<x|y>
+    //обрабатываем запись отрицательного числа в скобках/как начало строки/как -<x|y>
     expression = optimize(expression);
 
-    Vector<Lexeme> lexemes = lexemeAnalyze(expression);
+    lexexAnalyze(expression);
 
-    lex = lexemes;
-
+    initLB();
     int ans = expr();
 
     return ans;
@@ -284,17 +255,17 @@ int main() {
     string expression;
 
     cout << "Expression: ";
-    getline(cin, expression); // Р’РІРѕРґРёРј Р°СЂРёС„РјРµС‚РёС‡РµСЃРєРѕРµ РІС‹СЂР°Р¶РµРЅРёРµ
+    getline(cin, expression); // Вводим арифметическое выражение
 
     int x, y;
 
-    // Р’РѕРґРёРј РҐ Рё Y
+    // Водим Х и Y
     cout << "x: ";
     cin >> x;
     cout << "y: ";
     cin >> y;
 
-    //Р’С‹Р·РѕРІ РЅР°С€РµР№ С„СѓРЅРєС†РёРё
+    //Вызов нашей функции
     int ans = Form(expression, x, y);
 
     cout << "Answer: " << ans;
