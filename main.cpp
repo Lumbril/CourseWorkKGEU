@@ -1,7 +1,6 @@
 #include <iostream>
 using namespace std;
 
-// константы для обозначения лексем
 const char LEFT_BRACKET = '(';
 const char RIGHT_BRACKET = ')';
 const char OP_PLUS = '+';
@@ -11,17 +10,14 @@ const char OP_DIV = '/';
 const char NUMBER = 'N';
 const char END_STR = 'E';
 
-// Структура лексемы
 struct Lexeme {
     char type;
     string val;
 };
 
-// Массив хранящий лексемы
 Lexeme lexems[100000];
 int posLexems = 0;
 
-// Вспомогательный массив LexemBuffer и методы для его работы
 Lexeme lexemBuffer[100000];
 int posLB = 0;
 int szLB;
@@ -46,7 +42,6 @@ int getPosLB() {
     return posLB;
 }
 
-// Метод для разбиения строки на лексемы
 void lexexAnalyze(string expText) {
     int pos = 0;
 
@@ -145,7 +140,6 @@ string optimize(string s) {
     return s;
 }
 
-// Рекурсивные методы для вычисления выражения
 int expr();
 int plusminus();
 int multdiv();
@@ -231,7 +225,6 @@ int factor() {
 }
 
 int Form(string expression, int x, int y) {
-    // Заменяем все X и Y на их значения
     while (expression.find('x') != string :: npos) {
         expression.replace(expression.find('x'), 1, to_string(x));
     }
@@ -240,7 +233,6 @@ int Form(string expression, int x, int y) {
         expression.replace(expression.find('y'), 1, to_string(y));
     }
 
-    //обрабатываем запись отрицательного числа в скобках/как начало строки/как -<x|y>
     expression = optimize(expression);
 
     lexexAnalyze(expression);
@@ -255,17 +247,15 @@ int main() {
     string expression;
 
     cout << "Expression: ";
-    getline(cin, expression); // Вводим арифметическое выражение
+    getline(cin, expression); // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 
     int x, y;
 
-    // Водим Х и Y
     cout << "x: ";
     cin >> x;
     cout << "y: ";
     cin >> y;
 
-    //Вызов нашей функции
     int ans = Form(expression, x, y);
 
     cout << "Answer: " << ans;
