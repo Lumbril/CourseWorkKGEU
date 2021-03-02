@@ -147,8 +147,8 @@ string optimize(string s) {
 
 // –екурсивные методы дл€ вычислени€ выражени€
 int expr();
-int multdiv();
 int plusminus();
+int multdiv();
 int factor();
 
 int expr() {
@@ -160,29 +160,6 @@ int expr() {
         backLB();
 
         return plusminus();
-    }
-}
-
-int multdiv() {
-    int val = factor();
-
-    while (1) {
-        Lexeme lexeme = nextLB();
-
-        switch (lexeme.type) {
-            case OP_MULT:
-                val *= factor();
-
-                break;
-            case OP_DIV:
-                val /= factor();
-
-                break;
-            default:
-                backLB();
-
-                return val;
-        }
     }
 }
 
@@ -199,6 +176,29 @@ int plusminus() {
                 break;
             case OP_MINUS:
                 val -= multdiv();
+
+                break;
+            default:
+                backLB();
+
+                return val;
+        }
+    }
+}
+
+int multdiv() {
+    int val = factor();
+
+    while (1) {
+        Lexeme lexeme = nextLB();
+
+        switch (lexeme.type) {
+            case OP_MULT:
+                val *= factor();
+
+                break;
+            case OP_DIV:
+                val /= factor();
 
                 break;
             default:
