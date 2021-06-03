@@ -32,11 +32,6 @@ void backPosLex() {
     posLexemes--;
 }
 
-// функция для получения текущего индекса
-int getPosLex() {
-    return posLexemes;
-}
-
 // метод для инициализации массива лексем
 void lexemeAnalyze(string expText);
 
@@ -45,13 +40,13 @@ void lexemeAnalyze(string expText);
 string optimize(string s);
 
 // основные функции для анализа мат. выражения
-int expr();
-int plusminus();
-int multdiv();
-int factor();
+double expr();
+double plusminus();
+double multdiv();
+double factor();
 
 //функция для замены x, y на их значения и вычисление результата
-int form(string expression, int x, int y);
+double form(string expression, double x, double y);
 
 int main() {
     string expression; // строка для хранения мат. выражения
@@ -59,21 +54,21 @@ int main() {
     cout << "Expression: ";
     getline(cin, expression);
 
-    int x, y;
+    double x, y;
 
     cout << "x: ";
     cin >> x;
     cout << "y: ";
     cin >> y;
 
-    int ans = form(expression, x, y); // вычисление результата
+    double ans = form(expression, x, y); // вычисление результата
 
     cout << "Answer: " << ans;
 
     return 0;
 }
 
-int form(string expression, int x, int y) {
+double form(string expression, double x, double y) {
     // замена переменных на их значения
     while (expression.find('x') != string::npos) {
         expression.replace(expression.find('x'), 1, to_string(x));
@@ -89,20 +84,18 @@ int form(string expression, int x, int y) {
     // инициализация массива лексем
     lexemeAnalyze(expression);
 
-    int ans = expr();
+    double ans = expr();
 
     return ans;
 }
 
 string optimize(string s) {
-    string buff = "";
-
     if (s[0] == '-') {
         s = "(0" + s;
 
         int i = 4;
 
-        while ('0' <= s[i] && s[i] <= '9') {
+        while ('0' <= s[i] && s[i] <= '9' || s[i] == '.') {
             i++;
         }
 
@@ -115,7 +108,7 @@ string optimize(string s) {
 
             int j = i + 4;
 
-            while ('0' <= s[j] && s[j] <= '9') {
+            while ('0' <= s[j] && s[j] <= '9' || s[j] == '.') {
                 j++;
             }
 
@@ -164,11 +157,16 @@ void lexemeAnalyze(string expText) {
 
                 break;
             default:
-                if ('0' <= ch && ch <= '9') {
+                if (('0' <= ch && ch <= '9') || (ch == '.' || ch == ',')) {
                     string buf = "";
 
                     do {
-                        buf += ch;
+                        if (ch != ','){
+                            buf += ch;
+                        } else {
+                            buf += '.';
+                        }
+
                         pos++;
 
                         if (pos >= expText.size()) {
@@ -176,7 +174,7 @@ void lexemeAnalyze(string expText) {
                         }
 
                         ch = expText[pos];
-                    } while ('0' <= ch && ch <= '9');
+                    } while (('0' <= ch && ch <= '9') || (ch == '.' || ch == ','));
 
                     lexemes[posLexemes++] = {NUMBER, buf};
                 } else {
@@ -193,7 +191,7 @@ void lexemeAnalyze(string expText) {
     posLexemes = 0;
 }
 
-int expr() {
+double expr() {
     Lexeme lexeme = nextLexeme();
 
     if (lexeme.type == END_STR) {
@@ -205,8 +203,8 @@ int expr() {
     }
 }
 
-int plusminus() {
-    int val = multdiv();
+double plusminus() {
+    double val = multdiv();
 
     while (1) {
         Lexeme lexeme = nextLexeme();
@@ -228,8 +226,8 @@ int plusminus() {
     }
 }
 
-int multdiv() {
-    int val = factor();
+double multdiv() {
+    double val = factor();
 
     while (1) {
         Lexeme lexeme = nextLexeme();
@@ -251,13 +249,13 @@ int multdiv() {
     }
 }
 
-int factor() {
+double factor() {
     Lexeme lexeme = nextLexeme();
-    int val;
+    double val;
 
     switch (lexeme.type) {
         case NUMBER:
-            return atoi(lexeme.val.c_str());
+            return stod(lexeme.val.c_str());
         case LEFT_BRACKET:
             val = expr();
             lexeme = nextLexeme();
